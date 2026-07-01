@@ -414,6 +414,23 @@ class X410Calibrator(USRPCalibratorBase):
     tune_settling_time = 0.5
 
 
+class X420Calibrator(USRPCalibratorBase):
+    """X420/HBX Calibration."""
+
+    mboard_ids = ("x420",)
+    # X420 max input level is 0 dBm and it is required for a proper cal.
+    max_input_power = 0
+    # Choosing 1250 MHz: In some bitfiles we don't have resamplers, so we need
+    # to choose the default master clock rate. The power cal utility can
+    # override this to a lower rate if needed.
+    default_rate = 1.25e9
+    min_freq = 10e6
+    max_freq = 20e9
+    # X420 non-timed tunes are currently very poke-intensive, so we give it some
+    # time to clear the command queue
+    tune_settling_time = 0.5
+
+
 class E3XXCalibrator(USRPCalibratorBase):
     """E3XX calibration class."""
 

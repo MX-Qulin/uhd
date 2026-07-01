@@ -284,7 +284,7 @@ class DramTransmitter:
         upload_timeout = 0.5
         last_update = time.monotonic()
         last_fullness = 0
-        while (last_fullness < num_bytes):
+        while last_fullness < num_bytes:
             time.sleep(0.001)
             fullness = self.replay_blocks[0].get_record_fullness(in_port)
             if fullness > last_fullness:
@@ -292,7 +292,8 @@ class DramTransmitter:
             last_fullness = fullness
             if time.monotonic() - last_update > upload_timeout:
                 raise RuntimeError(
-                    f"DRAM fullness did not reach expected levels! " f"{fullness}/{num_bytes} bytes."
+                    f"DRAM fullness did not reach expected levels! "
+                    f"{fullness}/{num_bytes} bytes."
                 )
 
         return num_bytes
@@ -726,12 +727,16 @@ class DramReceiver:
         tmp_stream_cmd = stream_cmd
         for idx, rcp in enumerate(self.radio_chan_pairs):
             stream_cmd = tmp_stream_cmd
-            # Flush data on output buffer
-            flush_timeout = time.monotonic() + 0.25
-            while time.monotonic() < flush_timeout:
-                if self.replay_blocks[0].get_record_fullness(ports[idx]) == 0:
-                    break
-                self.replay_blocks[0].record_restart(ports[idx])
+            # Flush data on output buffer only if wait_for_buffer_complete is
+            # set. The record and record_restart calls below both reset the FPGA
+            # record engine. When the record engine state is known the flush
+            # loop can be skipped for speedup.
+            if wait_for_buffer_complete:
+                flush_timeout = time.monotonic() + 0.25
+                while time.monotonic() < flush_timeout:
+                    if self.replay_blocks[0].get_record_fullness(ports[idx]) == 0:
+                        break
+                    self.replay_blocks[0].record_restart(ports[idx])
             mem_region = mem_regions[ports[idx]]
             mem_size = min(stream_cmd.num_samps * self.bytes_per_sample, mem_region[1])
             self.replay_blocks[0].record(mem_region[0], mem_size, ports[idx])
@@ -745,6 +750,7 @@ class DramReceiver:
                 stream_cmd.num_samps = int(tmp_stream_cmd.num_samps * rate_ratio)
                 stream_cmd.stream_now = tmp_stream_cmd.stream_now
                 stream_cmd.time_spec = tmp_stream_cmd.time_spec
+                stream_cmd.trigger = tmp_stream_cmd.trigger
             rcp[0].issue_stream_cmd(stream_cmd, rcp[1])
 
         if wait_for_buffer_complete:

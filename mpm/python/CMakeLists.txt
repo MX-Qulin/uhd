@@ -66,6 +66,13 @@ elseif(MPM_DEVICE STREQUAL "x4xx")
 endif(MPM_DEVICE STREQUAL "n3xx")
 
 if(NOT ENABLE_SIM)
+    # Place the built .so directly in the build-tree Python package directory so
+    # that `make test` (CTest) can import it.
+    if(NOT WIN32)
+        set_target_properties(pyusrp_periphs PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/python/usrp_mpm"
+        )
+    endif(NOT WIN32)
     target_include_directories(pyusrp_periphs PUBLIC
         ${PYTHON_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/lib/
@@ -153,9 +160,9 @@ if(NOT ENABLE_SIM)
             DESTINATION ${CMAKE_INSTALL_BINDIR}
         )
         install(PROGRAMS
-            usrp_mpm/dboard_manager/zbx_update_cpld.py
+            usrp_mpm/dboard_manager/x4xx_db_update_cpld.py
             DESTINATION ${CMAKE_INSTALL_BINDIR}
-            RENAME zbx_update_cpld
+            RENAME x4xx_db_update_cpld
         )
         install(PROGRAMS
             usrp_mpm/periph_manager/x4xx_update_cpld.py

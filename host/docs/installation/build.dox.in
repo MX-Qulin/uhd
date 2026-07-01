@@ -47,13 +47,12 @@ Note: The MSI version of the CMake installer will guide you through these steps.
 ### Boost
 
 - **Purpose:** C++ library
-- **Minimum Version:** @UHD_BOOST_MIN_VERSION@
+- **Minimum Version:** @UHD_BOOST_MIN_VERSION@ (1.76 on Windows)
 - **Usage:** build time + runtime (required)
-- **Download URL:** http://www.boost.org/users/download/
-- **Download URL (Windows installer):** http://sourceforge.net/projects/boost/files/boost-binaries/
+- **Download URL:** http://www.boost.org/releases
 
-The Boost binary installer must be selected to match the architecture of Windows + installed MSVC toolset version and being run. <br>
-Note: The MSVC toolset version is v140 for Visual Studio 2015, v141 for 2017, v142 for 2019, and v143 for 2022.
+On Windows, obtain a Boost release that matches your target architecture and installed MSVC toolset version, or use a package manager such as vcpkg or Conan.<br>
+Note: The MSVC toolset version is v142 for Visual Studio 2019, v143 for 2022, and v145 for 2026.
 
 ### LibUSB
 
@@ -290,8 +289,10 @@ extensions:
   - Set "Visual Studio 17 2022" as the compiler. Select the latest MSVC that is available on the machine. Leave other settings as default.
   - Click “Finish” and allow CMake to Generate
 - Set or add the build variables with type PATH
-  - `Boost_INCLUDE_DIR` should point to the `PATH` where the Boost .hpp files are, e.g. `C:\local\boost_version\`
-  - `Boost_LIBRARY_DIR` should point to the pre-built libraries, e.g. `C:\local\boost_version\lib64-msvc-14.3`)
+  - `Boost_DIR` should point to the `PATH` where the generic (Boost module agnostic) BoostConfig.cmake files are located,
+    e.g. `C:\local\&lt;boost_version&gt;\lib64-msvc-14.3\cmake\Boost-&lt;boost_version&gt;`.
+  NOTE: Tested with Boost 1.73.0 and later.
+  NOTE: Variables are different for UHD 4.9.0 and earlier.
 - If a release UHD build is required:
   - Click on "Generate", and a project file will be created in the build directory.
 - If a debug UHD build is required:
